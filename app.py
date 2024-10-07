@@ -5,12 +5,25 @@ import torch
 # Initialize Flask app
 app = Flask(__name__)
 
-# Load the fine-tuned Blenderbot model and tokenizer
-model = BlenderbotForConditionalGeneration.from_pretrained('SomeUser675/mentalconvobot')
-tokenizer = BlenderbotTokenizer.from_pretrained('SomeUser675/mentalconvobot')
+# Model and tokenizer are initially set to None
+model = None
+tokenizer = None
+
+# Function to load the model and tokenizer when needed (lazy loading)
+def load_model():
+    global model, tokenizer
+    if model is None or tokenizer is None:
+        print("Loading model and tokenizer...")
+        model = BlenderbotForConditionalGeneration.from_pretrained('SomeUser675/mentalconvobot')
+        tokenizer = BlenderbotTokenizer.from_pretrained('SomeUser675/mentalconvobot')
+        print("Model and tokenizer loaded.")
 
 # Function to generate a response
 def generate_response(input_text, max_length=100, min_length=30, temperature=0.7, top_k=50, top_p=0.95):
+    # Ensure the model and tokenizer are loaded
+    load_model()
+
+    # Tokenize the input
     inputs = tokenizer(input_text, return_tensors="pt")
     inputs = {key: value.to(model.device) for key, value in inputs.items()}
 
